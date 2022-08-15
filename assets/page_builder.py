@@ -4,7 +4,7 @@ class PageBuilder:
     def __init__(self):
         self.page = ""
         self.page_title = ""
-        self.page_poster_path = 'https://images.pexels.com/photos/46505/swiss-shepherd-dog-dog-pet-portrait-46505.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
+        self.page_poster_path = 'https://images.pexels.com/photos/8162662/pexels-photo-8162662.jpeg'
         self.style = config.style_for_page 
         self.story_pages = []
         self.page_link = "" 
@@ -78,7 +78,7 @@ class PageBuilder:
         script = '{"ad-attributes": {"type": "adsense","data-ad-client": "ca-pub-5893452305550881","data-ad-slot": "7525101101"}}'
         self.page += f"""
     <body>
-        <amp-story standalone title="{self.page_title}" publisher="{publisher}"
+        <amp-story standalone title="{self.page_title} | Amerikanki" publisher="{publisher}"
             publisher-logo-src="{publisher_logo}" poster-portrait-src="{self.page_poster_path}">
 
             <amp-story-auto-ads>

@@ -1,13 +1,13 @@
 keywords_for_search = "Best"
 min_count_image_on_page = 5
 initial_query_for_search = "https://www.quora.com/search?q=pets&type=question"
-publisher = "kopasxa"
-publisher_logo = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/How_to_use_icon.svg/1200px-How_to_use_icon.svg.png"
+publisher = "Pets"
+publisher_logo = "https://amerikanki.com/amp_logo.png"
 timeout_page_generate = 0.1
 path_root = ".." # path to domain root
 path_to_stories = path_root + "/stories"
 my_domain = "http://8.eprosto.online"
-limit_of_answers = 450
+limit_of_answers = 350
 
 style_for_page = """
 <style amp-boilerplate>
@@ -100,6 +100,7 @@ style_for_page = """
         font-size: 2.2em;
         font-weight: normal;
         line-height: 1.174;
+        background-color: gray;
         padding: 0.5em;
     }
 
@@ -125,6 +126,7 @@ style_for_page = """
         font-size: 1.2em;
         font-weight: normal;
         line-height: 1.174;
+        background-color: gray;
         padding: 0.5em;
         margin-bottom: 2.2em;
     }

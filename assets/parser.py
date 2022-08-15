@@ -80,7 +80,7 @@ class Parse:
                         answer = answer.find("div", {"class": "puppeteer_test_answer_content"})
 
                         if len(answer.text) <= config.limit_of_answers and len(answer.text) > 0:
-                            stories.append({'answer': answer.text})
+                            stories.append({'answer': answer.text.capitalize()})
                 except:
                     pass
 
