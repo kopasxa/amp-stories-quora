@@ -1,15 +1,10 @@
-from lib2to3.pgen2 import driver
 from os import mkdir
-import os
-import pickle
 import re
 import time
-from urllib import request
 import config
 from bs4 import BeautifulSoup as bs
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
-from requests_html import HTMLSession
 from assets.page_builder import PageBuilder
 
 class Parse:
@@ -23,7 +18,7 @@ class Parse:
 
         self.options.add_argument("--log-level=OFF")
         try:
-            pass#self.options.add_argument('--headless') # for firefox on server
+            self.options.add_argument('--headless') # for firefox on server
         except:
             pass # for chrome of debug mode
 
@@ -62,82 +57,37 @@ class Parse:
 
         return arcticles_list
 
-    def find_poster_path(self, page, title):
+    def get_title(self, page):
         soup = bs(page, 'html.parser')
-        try:
-            reg = re.compile('[^0-9\s^a-zA-Z]')
-            title = reg.sub('', title)
 
-            pathDir = f'{config.path_to_stories}/{"_".join(title.split(" ")).split(".")[0]}'
-            path = f'{config.path_to_stories}/{"_".join(title.split(" ")).split(".")[0]}/img/poster.jpg'
-            pathToImage = './img/poster.jpg'
-            result = soup.find('div', {'class': 'content-lede-image'}).find('img')['src'].split("?")[0]
+        title = soup.select_one('#mainContent > div.q-box.qu-borderAll.qu-borderRadius--small.qu-borderColor--raised.qu-boxShadow--small.qu-bg--raised > div > div > div > div.q-text.qu-dynamicFontSize--xlarge.qu-fontWeight--bold.qu-color--gray_dark_dim.qu-passColorToLinks.qu-lineHeight--regular.qu-wordBreak--break-word > span > span > div > div > div > span').get_text()
 
-            if result in "https://hips.hearstapps.com/hmg-prod.s3.amazonaws.com/images/legacy-fre-image-placeholder-1648561128.png":
-                return None
+        if len(title) <= 250:
+            return title
 
-            try:
-                if result != None:
-                    if not os.path.exists(pathDir):
-                        mkdir(pathDir)
-                        mkdir(pathDir + "/img")
-            except Exception as e:
-                pass
-                #print(e)
+        return None
 
-            if not os.path.exists(path):
-                request.urlretrieve(result, path)
-
-            return pathToImage
-        except Exception as e:
-            #print(e)
-            return None
-
-    def find_stories(self, page, title):
-        reg = re.compile('[^0-9\s^a-zA-Z]')
-        title = reg.sub('', title)
-
-        soup = bs(page, 'html.parser')
+    def find_stories(self, page):
         stories = []
         try:
-            container = soup.find('div', {'class': 'content-container'})
-            container_type = container.attrs['class'][1]
+            soup = bs(page, 'html.parser')
 
-            for el in container.find_all('p'):
-                if not len(el.text) > 0:
-                    el.extract()
+            #answer = soup.select_one("#mainContent > div.q-box.qu-borderAll.qu-borderRadius--small.qu-borderColor--raised.qu-boxShadow--small.qu-bg--raised > div > div > div > div.q-text.qu-dynamicFontSize--xlarge.qu-fontWeight--bold.qu-color--gray_dark_dim.qu-passColorToLinks.qu-lineHeight--regular.qu-wordBreak--break-word > span > span > div > div > div > span > span").text
+            answers = soup.select("#mainContent > div:nth-child(2) > div > div")
+            for answer in answers:
+                try:
+                    if "dom_annotate_question_answer_item" in answer.select_one("div")['class'][1]:
+                        answer = answer.find("div", {"class": "puppeteer_test_answer_content"})
 
-            for el in container.find_all('div'):
-                if not len(el.text) > 0:
-                    el.extract()
+                        if len(answer.text) <= config.limit_of_answers and len(answer.text) > 0:
+                            stories.append({'answer': answer.text})
+                except:
+                    pass
 
-            if container_type == "standard-container":
-                images = container.select('.article-body-content h2 ~ div.embed img')
-                headers = container.select('.article-body-content hr + .body-h2, div.embed + .body-h2, .body-text + .accordion ~ .body-h2')
-                links = container.select('.article-body-content h2 ~ div.embed a')
+            if len(stories) > 0:
+                return stories
 
-                if len(images) < len(headers):
-                    headers = headers[:-(len(headers) - len(images))]
-                
-            elif container_type == 'listicle-container':
-                images = container.select('.listicle-body-content .listicle-slide-product .listicle-slide-media-outer img')
-                headers = container.select('.listicle-body-content .listicle-slide-product .listicle-slide-hed-text')
-                links = container.select('.listicle-body-content .listicle-slide-product .listicle-slide-media-outer a')
-            else:
-                return None
-
-            if len(images) == len(headers) and len(images) == len(links):
-                for idx, story in enumerate(images):
-                    pathToImage = f'./img/{idx}.jpg'
-                    path = f'{config.path_to_stories}/{"_".join(title.split(" ")).split(".")[0]}/img/{idx}.jpg'
-                    result = story['data-src'].split("?")[0]
-                    
-                    if not os.path.exists(path):
-                        request.urlretrieve(result, path)
-
-                    stories.append({'header': headers[idx].text, 'image': pathToImage, 'link': links[idx]['href']})
-
-            return stories
+            return None
 
         except Exception as e:
             print(e)
@@ -160,41 +110,43 @@ class Parse:
 
     def run_page_builder(self, pages):
         for url in pages:
-            session = HTMLSession()
-            res = session.get('https://www.cosmopolitan.com' + url)
-            article_soup = bs(res.text, 'html.parser')
-            content_header = article_soup.find('div', {'class': 'content-header-inner'})
-            content_header_title = content_header.find('h1', {'class': 'content-hed'}).text
-            content_header_description = content_header.find('div', {'class': 'content-dek'}).text
-            content_poster = self.find_poster_path(res.text, content_header_title)
-            stories = self.find_stories(res.text, content_header_title)
-            #print(content_poster)
+            self.driver.get(url)
+            wait = WebDriverWait(self.driver, 10)
+            while True:
+                try:
+                    wait.until(lambda x: x.find_element(By.CSS_SELECTOR, "div#mainContent"))
+                    break
+                except:
+                    time.sleep(10)
 
-            if content_poster != None and stories != None:
+            title = self.get_title(self.driver.page_source)
+            stories = self.find_stories(self.driver.page_source)
+            print(url, stories)
+
+            if title != None and stories != None:
                 build = PageBuilder()
-                build.set_page_title(content_header_title)
-                build.set_page_poster(content_poster)
+                build.set_page_title(title)
 
                 build.build_start_page()
                 build.build_page_head()
+                build.set_page_link(url)
                 build.build_story_start(config.publisher, config.publisher_logo)
-                build.build_story("", "", content_header_description, story_type="first_story")
+                build.build_story(story_type="first_story")
 
                 for story in stories:
-                    build.build_story(story['image'], story['header'], "", story['link'])
+                    build.build_story(story['answer'])
 
                 build.build_end_page()
 
                 reg = re.compile('[^0-9\s^a-zA-Z]')
-                title = reg.sub('', content_header_title)
-                path = f'{config.path_to_stories}/{"_".join(title.split(" ")).split(".")[0]}/index'
+                title = reg.sub('', title)
+                path = f'{config.path_to_stories}/{"_".join(title.split(" ")).split(".")[0]}'
 
                 build.build_page(path)
 
                 self.register_sitemap(f'{config.my_domain}{path.split(config.path_root)[1]}.html')
 
-                time.sleep(config.timeout_page_generate * 60)
+            time.sleep(config.timeout_page_generate * 60)
 
     def __del__(self):
-        time.sleep(100)
         self.driver.quit()

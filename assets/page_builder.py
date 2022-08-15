@@ -4,21 +4,16 @@ class PageBuilder:
     def __init__(self):
         self.page = ""
         self.page_title = ""
-        self.page_poster_path = ""
+        self.page_poster_path = 'https://images.pexels.com/photos/46505/swiss-shepherd-dog-dog-pet-portrait-46505.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2'
         self.style = config.style_for_page 
         self.story_pages = []
-        #   Example of page: 
-        #   {
-        #       "title": "Hello World!",
-        #       "link": "This is a link to the product",
-        #       "path_to_image": "assets/images/test.jpg",
-        #   }
+        self.page_link = "" 
 
     def set_page_title(self, title):
         self.page_title = title
 
-    def set_page_poster(self, poster_path):
-        self.page_poster_path = poster_path
+    def set_page_link(self, link):
+        self.page_link = link
 
     def set_page_story(self, story_title, story_link, story_path):
         self.story_pages.append({
@@ -48,7 +43,7 @@ class PageBuilder:
         """
         return
 
-    def build_story(self, cover_image_path, title, description, link="", story_type="story"):
+    def build_story(self, title="", story_type="story"):
         if story_type == "first_story":
             self.page += f"""
             <amp-story-page id="cover">
@@ -58,24 +53,23 @@ class PageBuilder:
                 </amp-story-grid-layer>
                 <amp-story-grid-layer template="vertical">
                     <h1>{self.page_title}</h1>
-                    <p>{description}</p>
                 </amp-story-grid-layer>
+                
             </amp-story-page>
             """
+            #<amp-story-page-outlink layout="nodisplay" theme="dark">
+            #    <a href="{self.page_link}" title="Read More"></a>
+            #</amp-story-page-outlink>
         elif story_type == "story":
             self.page += f"""
             <amp-story-page id="page1">
                 <amp-story-grid-layer template="fill">
-                    <amp-img src="{cover_image_path}" width="720" height="1280" layout="responsive">
+                    <amp-img src="{self.page_poster_path}" width="720" height="1280" layout="responsive">
                     </amp-img>
                 </amp-story-grid-layer>
                 <amp-story-grid-layer template="vertical" class="bottom">
                     <h4>{title}</h4>
-                    <!-- <q>{description}</q> -->
                 </amp-story-grid-layer>
-                <amp-story-page-outlink layout="nodisplay" theme="dark">
-                    <a href="{link}" title="Read More"></a>
-                </amp-story-page-outlink>
             </amp-story-page>
             """
         return
