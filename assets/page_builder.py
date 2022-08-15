@@ -81,11 +81,14 @@ class PageBuilder:
         <amp-story standalone title="{self.page_title} | Amerikanki" publisher="{publisher}"
             publisher-logo-src="{publisher_logo}" poster-portrait-src="{self.page_poster_path}">
 
-            <amp-story-auto-ads>
-                <script type="application/json">
-                    {script}  
-                </script>
-            </amp-story-auto-ads>"""
+            <amp-ad width="100vw" height="320"
+                type="adsense"
+                data-ad-client="ca-pub-8064390991973365"
+                data-ad-slot="1224845979"
+                data-auto-format="rspv"
+                data-full-width="">
+                <div overflow=""></div>
+            </amp-ad>"""
         return
 
     def build_end_page(self):
