@@ -118,6 +118,7 @@ class Parse:
                     wait.until(lambda x: x.find_element(By.CSS_SELECTOR, "div#mainContent"))
                     break
                 except:
+                    print())
                     time.sleep(60*3)
 
             title = self.get_title(self.driver.page_source)
