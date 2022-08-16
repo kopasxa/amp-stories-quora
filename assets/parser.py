@@ -1,4 +1,3 @@
-from os import mkdir
 import re
 import time
 import config
@@ -8,10 +7,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from assets.page_builder import PageBuilder
 
 class Parse:
-    def __init__(self):
+    def __init__(self, url):
         from selenium import webdriver
 
-        self.search_url = config.initial_query_for_search
+        self.search_url = url
         #self.options = webdriver.ChromeOptions()
         self.options = webdriver.FirefoxOptions()
         self.articles = []
@@ -59,8 +58,10 @@ class Parse:
 
     def get_title(self, page):
         soup = bs(page, 'html.parser')
-
-        title = soup.select_one('#mainContent > div.q-box.qu-borderAll.qu-borderRadius--small.qu-borderColor--raised.qu-boxShadow--small.qu-bg--raised > div > div > div > div.q-text.qu-dynamicFontSize--xlarge.qu-fontWeight--bold.qu-color--gray_dark_dim.qu-passColorToLinks.qu-lineHeight--regular.qu-wordBreak--break-word > span > span > div > div > div > span').get_text()
+        try:
+            title = soup.select_one('#mainContent > div.q-box.qu-borderAll.qu-borderRadius--small.qu-borderColor--raised.qu-boxShadow--small.qu-bg--raised > div > div > div > div.q-text.qu-dynamicFontSize--xlarge.qu-fontWeight--bold.qu-color--gray_dark_dim.qu-passColorToLinks.qu-lineHeight--regular.qu-wordBreak--break-word > span > span > div > div > div > span').get_text()
+        except:
+            return None
 
         if len(title) <= 250:
             return title
@@ -121,7 +122,7 @@ class Parse:
 
             title = self.get_title(self.driver.page_source)
             stories = self.find_stories(self.driver.page_source)
-            print(url, stories)
+            #print(url, stories)
 
             if title != None and stories != None:
                 build = PageBuilder()
@@ -146,7 +147,7 @@ class Parse:
 
                 self.register_sitemap(f'{config.my_domain}{path.split(config.path_root)[1]}.html')
 
-            time.sleep(config.timeout_page_generate * 60)
+                time.sleep(config.timeout_page_generate)
 
     def __del__(self):
         self.driver.quit()

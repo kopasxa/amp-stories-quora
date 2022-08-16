@@ -1,9 +1,10 @@
 keywords_for_search = "Best"
 min_count_image_on_page = 5
-initial_query_for_search = "https://www.quora.com/search?q=pets&type=question"
+questions = ["puppy", "kitty", "pets", "dogs", "cats"]
+initial_query_for_search = "https://www.quora.com/search?q="
 publisher = "Pets"
 publisher_logo = "https://amerikanki.com/amp_logo.png"
-timeout_page_generate = 0.1
+timeout_page_generate = 20
 path_root = ".." # path to domain root
 path_to_stories = path_root + "/stories"
 my_domain = "http://8.eprosto.online"
